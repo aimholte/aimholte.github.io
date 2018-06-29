@@ -3,7 +3,8 @@
 <head>
         <meta charset="utf-8" />
         <title>Dudes That Code - A.J. Imholte</title>
-        <link rel="stylesheet" href="/theme/css/main.css" />
+        <link rel="stylesheet" href="aimholte.github.io/theme/css/main.css" />
+        <link href="aimholte.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dudes That Code Atom Feed" />
 
         <!--[if IE]>
             <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -12,25 +13,26 @@
 
 <body id="index" class="home">
         <header id="banner" class="body">
-                <h1><a href="/">Dudes That Code </a></h1>
+                <h1><a href="aimholte.github.io/">Dudes That Code </a></h1>
                 <nav><ul>
-                    <li><a href="/category/our-projects.html">Our Projects</a></li>
+                    <li><a href="aimholte.github.io/category/our-projects.html">Our Projects</a></li>
+                    <li><a href="aimholte.github.io/category/review.html">Review</a></li>
                 </ul></nav>
         </header><!-- /#banner -->
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="/the-hedge-algorithm-on-us-technology-stocks.html">The Hedge Algorithm on U.S. Technology Stocks</a></h1>
+                    <h1 class="entry-title"><a href="aimholte.github.io/the-hedge-algorithm-on-us-technology-stocks.html">The Hedge Algorithm on U.S. Technology Stocks</a></h1>
 <footer class="post-info">
         <abbr class="published" title="2018-06-24T08:00:00-05:00">
                 Published: Sun 24 June 2018
         </abbr>
 
         <address class="vcard author">
-                By                         <a class="url fn" href="/author/aj-imholte.html">A.J. Imholte</a>
+                By                         <a class="url fn" href="aimholte.github.io/author/aj-imholte.html">A.J. Imholte</a>
         </address>
-<p>In <a href="/category/our-projects.html">Our Projects</a>.</p>
-<p>tags: <a href="/tag/python.html">python</a> <a href="/tag/machine-learning.html">machine learning</a> <a href="/tag/finance.html">finance</a> <a href="/tag/investing.html">investing</a> </p>
+<p>In <a href="aimholte.github.io/category/our-projects.html">Our Projects</a>.</p>
+<p>tags: <a href="aimholte.github.io/tag/python.html">python</a> <a href="aimholte.github.io/tag/machine-learning.html">machine learning</a> <a href="aimholte.github.io/tag/finance.html">finance</a> <a href="aimholte.github.io/tag/investing.html">investing</a> </p>
 </footer><!-- /.post-info --><h2>Background</h2>
 <p>The Hedge algorithm was originally presented by Yoav Freund and Robert E. Schapire in 1996 named "<em>A Decision-Theoretic Generalization of On-Line Learning<br>and an Application to Boosting</em>" and was presented as a way to solve what is known by those in the field as an <em>online allocation problem</em>.</p>
 <h2>The Problem</h2>
@@ -147,16 +149,16 @@ won had he bet everything with the luckiest of his friends.</p>
 <p>Looking at the performance metrics, our unoptimized informed algorithm beats its counterpart naive algorithm in every category, other than maximum drawdown and Calmar ratio. Looking at our other available benchmarks, the S&amp;P 500's and iShares' performance over this time period, it looks like the informed algorithm is also at least staying on par with its benchmarks. Based off this, I think it's safe to say that our family of informed algorithms are better than our naive algorithms in terms of performance on this dataset. This conclusion confirms our first theory! One down, one to go!</p>
 <p>Now that we have the answer to our first question in hand, what about the second one? <strong>Is parameter tuning effective?</strong></p>
 <p>Let's point our attention to optimized/unoptimized algorithms for the answer. Based off the chart, it looks like in both the naive and informed case that it's pretty unclear which is actually performing better. Maybe some graphs can help us out here? <br></p>
-<p><img alt="" src="/images/informedhedge_vs_stocks.png"><br></p>
+<p><img alt="" src="aimholte.github.io/images/informedhedge_vs_stocks.png"><br></p>
 <p>Here we have the unoptimized informed hedge algorithm against all the individual stock returns that we considered in this period. This is a pretty interesting graph. As you can see, the algorithm is not the best performer in group. It's pretty consistently average. <br>
-<img alt="" src="/images/informedhedge_vs_market.png"><br>
+<img alt="" src="aimholte.github.io/images/informedhedge_vs_market.png"><br>
 Now, when we look at it at the market level, all of a sudden its performance looks much better! How come? Because it's <strong>very difficult if not impossible</strong> for this algorithm to consistently beat the best stocks in sector over time, <strong>but</strong> it is possible to outperform the market. This doesn't mean we should start using this for our retirements quite yet and quit our day jobs...more  on this later.<br></p>
-<p><img alt="" src="/images/informedhedgeoptimized_vs_stocks.png"><br>
+<p><img alt="" src="aimholte.github.io/images/informedhedgeoptimized_vs_stocks.png"><br>
 Looks pretty similar to what we had before, right?
-<img alt="" src="/images/informedhedgeoptimized_vs_market.png"><br>
+<img alt="" src="aimholte.github.io/images/informedhedgeoptimized_vs_market.png"><br>
 Compared to the market, that seems to look substantially better than the unoptimized version.</p>
 <p>Just to make sure we are on the right track - let's plot the performance of each version of the algorithm against each other: <br>
-<img alt="MyImage" src="/images/Figure_1.png"><br>
+<img alt="MyImage" src="aimholte.github.io/images/Figure_1.png"><br>
 This actually looks pretty close! Assuming we are using a buy-and-hold strategy, it looks like the <em>informed</em>, <em>optimized</em> hedge algorithm just barely beats out its optimized, naive counterpart. Looks like our second hypothesis is confirmed!</p>
 <h2>The Code</h2>
 <p>Now, the moment you've all been waiting for...the code itself!</p>
@@ -259,6 +261,7 @@ https://pythonprogramming.net/handling-stock-data-graphing-python-programming-fo
                 <div class="social">
                         <h2>social</h2>
                         <ul>
+                            <li><a href="aimholte.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
 
                             <li><a href="#">You can add links in your config file</a></li>
                             <li><a href="#">Another social link</a></li>
