@@ -16,13 +16,243 @@
                 <h1><a href="aimholte.github.io/">Dudes That Code </a></h1>
                 <nav><ul>
                     <li><a href="aimholte.github.io/category/our-projects.html">Our Projects</a></li>
-                    <li><a href="aimholte.github.io/category/review.html">Review</a></li>
                 </ul></nav>
         </header><!-- /#banner -->
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="aimholte.github.io/the-hedge-algorithm-on-us-technology-stocks.html">The Hedge Algorithm on U.S. Technology Stocks</a></h1>
+                    <h1 class="entry-title"><a href="aimholte.github.io/fitlering-false-breakouts-in-the-foreign-exchange-market.html">Fitlering False Breakouts in the Foreign Exchange Market</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2018-07-06T08:00:00-05:00">
+                Published: Fri 06 July 2018
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="aimholte.github.io/author/aj-imholte.html">A.J. Imholte</a>
+        </address>
+<p>In <a href="aimholte.github.io/category/our-projects.html">Our Projects</a>.</p>
+<p>tags: <a href="aimholte.github.io/tag/matlab.html">matlab</a> <a href="aimholte.github.io/tag/finance.html">finance</a> <a href="aimholte.github.io/tag/investing.html">investing</a> <a href="aimholte.github.io/tag/algorithmic-trading.html">algorithmic trading</a> </p>
+</footer><!-- /.post-info --><h1>Introduction</h1>
+<p>Hello, and welcome back to Dudes That Code! Today, we are going to be covering another project from the realms of finance...this time, in the foreign exchange market. In this post, we will show you how we went about implementing Filtering False Breakouts, the popular foreign exchange market trading strategy.</p>
+<h1>The Strategy</h1>
+<p><br></p>
+<p><img alt="falsebreakouts" src="aimholte.github.io/images/filteringfalsebreakouts.png"><br></p>
+<p>This trading strategy has two parts - one for long positions and one for short positions. Let's start with the long position first!</p>
+<h2>Long Position</h2>
+<ol>
+<li>Look for a currency pair that is making a twenty-day high.</li>
+<li>Look for the price to reverse over the next three days to make a two-day low.</li>
+<li>Buy the pair if it takes out the twenty-day high within three days of making the two-day low.</li>
+<li>Sell the pair when the trade profit is double the amount risked.  In this case, that means <strong>two times</strong> the difference of the <strong>twenty-day high</strong> and the <strong>two-day</strong> low. </li>
+</ol>
+<h2>Short Position</h2>
+<p>The short position is just the opposite of the long position:
+1. Look for a currency pair that is making a twenty-day low.
+2. Look for the pair to reverse over the next three days to make a two-day high.
+3. Sell the pair (short) if it trades below the twenty-day low within three days of making the two-day high.
+4. Close the short position if the trade profit is double the amount risked. Similarly to before, this is <strong>two times</strong> the difference of the <strong>twenty-day low</strong> and the <strong>two-day high</strong>.</p>
+<p>Basically, what this strategy hopes to do is <strong>catch large reversal trends</strong> once the market has been sold off of a large amount of long/short positions. In this way, the strategy is able to catch the overall trend of the market while mitigating losses.</p>
+<h1>The Code</h1>
+<p>Now, let's go over how this strategy is implemented.</p>
+<h2>Long position</h2>
+<div class="highlight"><pre><span></span><span class="n">longbuyindicator</span> <span class="p">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">closeprice</span><span class="p">));</span>
+<span class="n">longsellindicator</span> <span class="p">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">closeprice</span><span class="p">));</span>
+<span class="nb">i</span> <span class="p">=</span> <span class="nb">length</span><span class="p">(</span><span class="n">closeprice</span><span class="p">);</span>
+<span class="k">for</span> <span class="nb">i</span><span class="p">=</span><span class="nb">length</span><span class="p">(</span><span class="n">closeprice</span><span class="p">):</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">20</span>
+        <span class="n">start</span> <span class="p">=</span> <span class="nb">i</span><span class="p">;</span>
+        <span class="n">window</span> <span class="p">=</span> <span class="nb">i</span> <span class="o">-</span> <span class="mi">19</span><span class="p">;</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">=</span><span class="n">start</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">window</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="n">max</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">i</span><span class="o">-</span><span class="mi">19</span><span class="p">:</span><span class="nb">i</span><span class="p">)))</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+                        <span class="n">longbuyindicator</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">false</span><span class="p">;</span>
+                        <span class="n">amountrisked</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">-</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">);</span>
+                        <span class="n">originalmax</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+                        <span class="nb">j</span> <span class="p">=</span> <span class="nb">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="k">while</span><span class="p">(</span><span class="n">sellcondition</span> <span class="o">~=</span> <span class="n">true</span><span class="p">)</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="o">&gt;</span><span class="p">=</span> <span class="p">(</span><span class="n">originalmax</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">amountrisked</span><span class="p">))</span>
+                                <span class="n">longsellindicator</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                                <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">true</span><span class="p">;</span>
+                            <span class="k">end</span>
+                            <span class="nb">j</span> <span class="p">=</span> <span class="nb">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="k">end</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="k">end</span>
+                        <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">4</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+                            <span class="n">longbuyindicator</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">4</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                            <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">false</span><span class="p">;</span>
+                            <span class="n">amountrisked</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">-</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">);</span>
+                            <span class="n">originalmax</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+                            <span class="nb">j</span> <span class="p">=</span> <span class="nb">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                            <span class="k">while</span><span class="p">(</span><span class="n">sellcondition</span> <span class="o">~=</span> <span class="n">true</span><span class="p">)</span>
+                                <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="o">&gt;</span><span class="p">=</span> <span class="p">(</span><span class="n">originalmax</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">amountrisked</span><span class="p">))</span>
+                                <span class="n">longsellindicator</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                                <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">true</span><span class="p">;</span>
+                                <span class="k">end</span>
+                            <span class="nb">j</span> <span class="p">=</span> <span class="nb">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                            <span class="k">end</span>
+                            <span class="k">break</span><span class="p">;</span>
+                        <span class="k">end</span>
+                    <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+                        <span class="n">longbuyindicator</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">false</span><span class="p">;</span>
+                        <span class="n">amountrisked</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">-</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">);</span>
+                        <span class="n">originalmax</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+                        <span class="nb">j</span> <span class="p">=</span> <span class="nb">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="k">while</span><span class="p">(</span><span class="n">sellcondition</span> <span class="o">~=</span> <span class="n">true</span><span class="p">)</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="o">&gt;</span><span class="p">=</span> <span class="p">(</span><span class="n">originalmax</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">amountrisked</span><span class="p">))</span>
+                            <span class="n">longsellindicator</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                            <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">true</span><span class="p">;</span>
+                            <span class="k">end</span>
+                            <span class="nb">j</span> <span class="p">=</span> <span class="nb">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="k">end</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="k">end</span>
+                <span class="k">end</span>
+            <span class="k">end</span>
+        <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+
+<p>This can be an intimidating piece of code to look at, but basically what is going on here is that first, we search for an entry position. When we find an entry position, we being search for exit positions, which can be triggered by any one of our while loops in this case.</p>
+<h2>Short Condition</h2>
+<p>The short condition is almost identical to the long condition in terms of code structure. </p>
+<div class="highlight"><pre><span></span><span class="k">for</span> <span class="nb">i</span><span class="p">=</span><span class="nb">length</span><span class="p">(</span><span class="n">closeprice</span><span class="p">):</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">20</span>
+        <span class="n">start</span> <span class="p">=</span> <span class="nb">i</span><span class="p">;</span>
+        <span class="n">window</span> <span class="p">=</span> <span class="nb">i</span> <span class="o">-</span> <span class="mi">19</span><span class="p">;</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">=</span><span class="n">start</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">window</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="n">min</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">i</span><span class="o">-</span><span class="mi">19</span><span class="p">:</span><span class="nb">i</span><span class="p">)))</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="n">twodaymax</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.0010</span><span class="p">;</span>
+                    <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+                        <span class="n">shortbuyindicator</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">false</span><span class="p">;</span>
+                        <span class="n">amountrisked</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+                        <span class="n">originalmax</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+                        <span class="n">stop</span> <span class="p">=</span> <span class="n">originalmax</span> <span class="o">+</span> <span class="mf">0.0010</span><span class="p">;</span>
+                        <span class="nb">j</span> <span class="p">=</span> <span class="nb">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="k">while</span><span class="p">(</span><span class="n">sellcondition</span> <span class="o">~=</span> <span class="n">true</span><span class="p">)</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="o">&lt;</span><span class="p">=</span> <span class="p">(</span><span class="n">originalmax</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">amountrisked</span><span class="p">))</span>
+                                <span class="n">shortsellindicator</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                                <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">true</span><span class="p">;</span>
+                                <span class="k">break</span><span class="p">;</span>
+                            <span class="k">end</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="o">&gt;</span><span class="p">=</span> <span class="n">stop</span><span class="p">)</span>
+                                <span class="n">shortsellindicator</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                                <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">true</span><span class="p">;</span>
+                                <span class="k">break</span><span class="p">;</span>
+                            <span class="k">end</span>
+                            <span class="nb">j</span> <span class="p">=</span> <span class="nb">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="k">end</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="k">end</span>
+                        <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">4</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+                            <span class="n">shortbuyindicator</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">4</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                            <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">false</span><span class="p">;</span>
+                            <span class="n">amountrisked</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+                            <span class="n">originalmax</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+                            <span class="n">stop</span> <span class="p">=</span> <span class="n">originalmax</span> <span class="o">+</span> <span class="mf">0.0010</span><span class="p">;</span>
+                            <span class="nb">j</span> <span class="p">=</span> <span class="nb">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                            <span class="k">while</span><span class="p">(</span><span class="n">sellcondition</span> <span class="o">~=</span> <span class="n">true</span><span class="p">)</span>
+                                <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="o">&lt;</span><span class="p">=</span> <span class="p">(</span><span class="n">originalmax</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">amountrisked</span><span class="p">))</span>
+                                    <span class="n">shortsellindicator</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                                    <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">true</span><span class="p">;</span>
+                                    <span class="k">break</span><span class="p">;</span>
+                                <span class="k">end</span>
+                                <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="o">&gt;</span><span class="p">=</span> <span class="n">stop</span><span class="p">)</span>
+                                    <span class="n">shortsellindicator</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                                    <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">true</span><span class="p">;</span>
+                                    <span class="k">break</span><span class="p">;</span>
+                                <span class="k">end</span>
+                            <span class="nb">j</span> <span class="p">=</span> <span class="nb">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                            <span class="k">end</span>
+                            <span class="k">break</span><span class="p">;</span>
+                        <span class="k">end</span>
+                    <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+                        <span class="n">shortbuyindicator</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">false</span><span class="p">;</span>
+                        <span class="n">amountrisked</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+                        <span class="n">originalmax</span> <span class="p">=</span> <span class="n">closeprice</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+                        <span class="nb">j</span> <span class="p">=</span> <span class="nb">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="n">stop</span> <span class="p">=</span> <span class="n">originalmax</span> <span class="o">+</span> <span class="mf">0.0010</span><span class="p">;</span>
+                        <span class="k">while</span><span class="p">(</span><span class="n">sellcondition</span> <span class="o">~=</span> <span class="n">true</span><span class="p">)</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="o">&lt;</span><span class="p">=</span> <span class="p">(</span><span class="n">originalmax</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">amountrisked</span><span class="p">))</span>
+                                <span class="n">shortsellindicator</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                                <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">true</span><span class="p">;</span>
+                                <span class="k">break</span><span class="p">;</span>
+                            <span class="k">end</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">closeprice</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="o">&gt;</span><span class="p">=</span> <span class="n">stop</span><span class="p">)</span>
+                                <span class="n">shortsellindicator</span><span class="p">(</span><span class="nb">j</span><span class="p">)</span> <span class="p">=</span> <span class="mi">1</span><span class="p">;</span>
+                                <span class="n">sellcondition</span> <span class="p">=</span> <span class="n">true</span><span class="p">;</span>
+                                <span class="k">break</span><span class="p">;</span>
+                            <span class="k">end</span>
+                            <span class="nb">j</span> <span class="p">=</span> <span class="nb">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                        <span class="k">end</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="k">end</span>
+                <span class="k">end</span>
+            <span class="k">end</span>
+        <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+
+<p>Once again, we see a ton of loops - scary, right? While these were pretty involved to write at the time, these are basically doing the same things as before. Finding buying conditions first and, once a buying condition is met, looping until we find a matching selling condition.</p>
+<h1>Performance</h1>
+<p>So, how does this actually perform in practice? We backtested this strategy to find the answer to this problem, using tick-by-tick data of the GBP/USD exchange rate from December 3, 2010 to January 31, 2010. Here are the results summarized below!  </p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Short Strategy</th>
+<th>Long Strategy</th>
+<th>Combined</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trades Executed</td>
+<td>5</td>
+<td>2</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Percent of Profitable Trades</td>
+<td>80%</td>
+<td>100%</td>
+<td>85.60%</td>
+</tr>
+<tr>
+<td>Trade Profit</td>
+<td>0.0614</td>
+<td>0.0833</td>
+<td>0.1447</td>
+</tr>
+</tbody>
+</table>
+<p>Keep in mind that the profits are in terms relative to one dollar invested.  So, if we would have invested one dollar using this strategy in this month, we would have made almost fifteen cents per dollar in the course of a month. If we were to simply buy-and-hold the exchange rate (which investors rarely  do, but this is really are only way to benchmark our results), we would have made about twelve cents per dollar invested. That means that we are outperforming the benchmark by using this strategy!</p>
+<h1>More Caveats</h1>
+<p>If you saw my last post on <a href="http://dudesthatcode.com/category/our-projects.html">using the Hedge algorithm in the stock maret</a>, then you are probably familiar with this section of my finance posts. </p>
+<p>Algorithmic is tough, but it is <strong>extremely so</strong> in the foreign exchange market. Why is this? Two words. <strong>Market makers</strong>. Think big, large financial institutions that are responsible for monitoring the forex market. On top of monitoring, they also buy and sell currencies to facilitate the marketplace. They also have access to what is known as the <strong>order</strong> book. Think of it as a ledger that is updated in real-time, that shows investors how many buying and selling orders are coming through the marketplace. </p>
+<p>This - as you can probably guess - puts these large financial institutions at a <strong>huge</strong> advantage in the market in the form of additional information that mom and pop investors don't have. Not to mention that they have extremely large cash reserves for making trades, and impressive technology and traders to actually execute these trades.</p>
+<p>This makes investing the forex market as an individual investor, in my opinion, a very <strong>risky</strong> and <strong>dangerous</strong> proposition, even with a thought-out trading strategy. This is typically why you see investors starting out simply in stocks or ETFs, since they operate in markets that much less prone to market manipulations unlike the forex markets. And if you think <strong>that's</strong> bad, don't even get me started  on Bitcoin and cryptos...<br></p>
+<p><img alt="sadbitcointrader" src="aimholte.github.io/images/hide-the-pain-harold.jpg"><br></p>
+<p>That about wraps it up for today, thanks for reading and see you next time!</p>                </article>
+            </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="aimholte.github.io/the-hedge-algorithm-on-us-technology-stocks.html" rel="bookmark"
+                           title="Permalink to The Hedge Algorithm on U.S. Technology Stocks">The Hedge Algorithm on U.S. Technology Stocks</a></h1>
+                </header>
+
+                <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2018-06-24T08:00:00-05:00">
                 Published: Sun 24 June 2018
@@ -33,221 +263,12 @@
         </address>
 <p>In <a href="aimholte.github.io/category/our-projects.html">Our Projects</a>.</p>
 <p>tags: <a href="aimholte.github.io/tag/python.html">python</a> <a href="aimholte.github.io/tag/machine-learning.html">machine learning</a> <a href="aimholte.github.io/tag/finance.html">finance</a> <a href="aimholte.github.io/tag/investing.html">investing</a> </p>
-</footer><!-- /.post-info --><h2>Background</h2>
-<p>The Hedge algorithm was originally presented by Yoav Freund and Robert E. Schapire in 1996 named "<em>A Decision-Theoretic Generalization of On-Line Learning<br>and an Application to Boosting</em>" and was presented as a way to solve what is known by those in the field as an <em>online allocation problem</em>.</p>
-<h2>The Problem</h2>
-<p>Freund and Schapire (1996) present an anecdotal example of what problem this algorithm seeks to solve in their paper:</p>
-<blockquote>
-<p>A gambler, frustrated by persistent horse-racing losses
-and envious of his friends' winnings, decides to allow a
-group of his fellow gamblers to make bets on his behalf. He
-decides he will wager a fixed sum of money in every race, but
-that he will apportion his money among his friends based on
-how well they are doing. Certainly, if he knew psychically
-ahead of time which of his friends would win the most, he
-would naturally have that friend handle all his wagers.
-Lacking such clairvoyance, however, he attempts to allocate
-each race's wager in such a way that his total winnings for the season will be reasonably close to what he would have
-won had he bet everything with the luckiest of his friends.</p>
-</blockquote>
-<p>More formally, the problem is defined as follows:</p>
-<p>An "allocation agent" (labeled as <em>A</em>) has a selection of <em>N</em> possble actions or <em>strategies</em> in each time period <em>T</em>, where <em>N</em> and <em>T</em> are both positive constants. In a given time period <em>t</em> from <em>t = 1,2,3...T</em>, the agent <em>A</em> selects an "allocation" - or weight - for each one of the possible options. The agent <em>A</em> then observes all the losses that results from playing each strategy with its corresponding weight. Strategies are then reweighted based off these observed losses.</p>
-<h2>Pseudocode</h2>
-<p>The pseudocode for the algorithm is relatively straightforward and is as follows:<br></p>
-<p><img alt="enter image description here" src="https://lh3.googleusercontent.com/_0y898-oBZjeXn_OFYRRRXU066BhGLyXX_QxgFQOxIgF-IYopak4pwSOYy4WP6czW1oBaPYGOUli"><br></p>
-<p>As you can see, the actual pseudocode for the algorithm is relatively straightforward. Which begs the question - how can we use this in the stock market?</p>
-<h2>Rationale for Use in the Stock Market</h2>
-<p>In a way, the problem is not too different from what many financial institutions must do: create a portfolio of "winning" stocks, where higher weights are used with stocks that are overall better in quality, both from a risk and return standpoint. One problem that many people have with creating their own portfolio is how much of their total portfolio should be comprised of a certain stock. That's where this algorithm comes in. The hedge algorithm will actually <em>compute</em> all the weights for the stocks we are considering in our portfolio, so we don't have to worry ourselves with picking the weight for each individual stock. That sure sounds like it would make life a little easier, right?</p>
-<h2>Our Approach</h2>
-<p>With all this in mind, we wanted to implement the hedge algorithm on a list of stocks from the iShares large cap technology sector ETF to see if the algorithm would outperform the market and the actual ETF itself. In order to do this, we obtained all the necessary stock data and processed it (this will be covered in another blog post). After mining and cleaning our data, we were left with closing prices for each stock in the ETF from 2010 to 2018. With this in hand, we were then able to implement the algorithm in Python using some helpful libraries.</p>
-<p>Before I go further, I will note that we tested four different versions of the hedge algorithm for this specific context, which were the following:</p>
-<ol>
-<li>A <em>naive</em>, <em>unoptimized</em> hedge algorithm. Basically, the barebones algorithm...with no additional information or tuning.</li>
-<li>A <em>naive</em>, <em>optimized</em> algorithm where we still have no additional information to add, but we do test and implement an optimal value for the value of the learning rate, <em>beta</em>.</li>
-<li>An <em>informed</em>, <em>unoptimized</em> hedge algorithm. This is very similar to the first case, but this time we give the algorithm the weights from the iShares large cap technology ETF as a starting point for all the stocks in consideration. In this way, we <em>inform</em> the algorithm with some knowledge of the dynamics of the system it's working with, which hopefully will lead to better results!</li>
-<li>An <em>informed</em>, <em>optimized</em> hedge algorithm. This is the cream of the crop as far as our three implementations go, since we are both <em>adding</em> additional information (like we do in the third case), but we are also <em>optimizing</em> by using an optimal learning rate for this specific situation (like the second case). Due to this, we are hoping this one will have the best results out of the four.</li>
-</ol>
-<h2>Our Results</h2>
-<p>I decided to put this first since the code itself is pretty lengthy. More on that below. In the meantime - I'll talk about the results that we got from this experiment here!</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Sharpe Ratio</th>
-<th>Calmar Ratio</th>
-<th>Upside Potential</th>
-<th>Maximum Drawdown</th>
-<th>Volatility</th>
-<th>Average Daily Return</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>S&amp;P 500</td>
-<td>1.62</td>
-<td>0.50</td>
-<td>56.0</td>
-<td>0.96</td>
-<td>0.29</td>
-<td>0.48</td>
-</tr>
-<tr>
-<td>iShares ETF</td>
-<td>1.41</td>
-<td>0.40</td>
-<td>34.6</td>
-<td>1.30</td>
-<td>0.37</td>
-<td>0.53</td>
-</tr>
-<tr>
-<td>Unoptimized Naive Hedge</td>
-<td>1.29</td>
-<td>0.82</td>
-<td>158.1</td>
-<td>0.93</td>
-<td>0.59</td>
-<td>0.76</td>
-</tr>
-<tr>
-<td>Optimized Naive Hedge</td>
-<td>1.34</td>
-<td>0.58</td>
-<td>94.7</td>
-<td>1.19</td>
-<td>0.52</td>
-<td>0.70</td>
-</tr>
-<tr>
-<td>Unoptimized Informed Hedge</td>
-<td>1.70</td>
-<td>0.52</td>
-<td>177.0</td>
-<td>1.64</td>
-<td>0.50</td>
-<td>0.86</td>
-</tr>
-<tr>
-<td>Optimized Informed Hedge</td>
-<td>1.52</td>
-<td>0.44</td>
-<td>93.2</td>
-<td>1.60</td>
-<td>0.46</td>
-<td>0.70</td>
-</tr>
-</tbody>
-</table>
-<p>That's a lot of numbers to take in, so let's talk a little bit more about what this means. Let's also keep in mind our two basic thoughts we had about this experiment as it relates to the stock market, and this algorithm in particular:</p>
-<ol>
-<li><em>More</em> and <em>better</em> information will help us make better returns on our investment.</li>
-<li>Parameter tuning will lead to algorithm <em>optimization</em>, which should improve results.</li>
-</ol>
-<p>Let's tackle that first one. <strong>Do we see better returns coming from a program with more information at its disposal?</strong></p>
-<p>For the answer to this question, we can compare the unoptimized naive and informed algorithms from the table above. </p>
-<p>A quick aside here - keep in mind that we want the Sharpe ratio, Calmar ratio, upside potential, and average daily return to be high - whereas we want volatility and maximum drawdown to be low. Think of the Sharpe, Calmar, upside potential, and average daily return as positive feedback that things are working. Conversely, volatility and maximum drawdown represent negative feedback...that things aren't working.</p>
-<p>Looking at the performance metrics, our unoptimized informed algorithm beats its counterpart naive algorithm in every category, other than maximum drawdown and Calmar ratio. Looking at our other available benchmarks, the S&amp;P 500's and iShares' performance over this time period, it looks like the informed algorithm is also at least staying on par with its benchmarks. Based off this, I think it's safe to say that our family of informed algorithms are better than our naive algorithms in terms of performance on this dataset. This conclusion confirms our first theory! One down, one to go!</p>
-<p>Now that we have the answer to our first question in hand, what about the second one? <strong>Is parameter tuning effective?</strong></p>
-<p>Let's point our attention to optimized/unoptimized algorithms for the answer. Based off the chart, it looks like in both the naive and informed case that it's pretty unclear which is actually performing better. Maybe some graphs can help us out here? <br></p>
-<p><img alt="" src="aimholte.github.io/images/informedhedge_vs_stocks.png"><br></p>
-<p>Here we have the unoptimized informed hedge algorithm against all the individual stock returns that we considered in this period. This is a pretty interesting graph. As you can see, the algorithm is not the best performer in group. It's pretty consistently average. <br>
-<img alt="" src="aimholte.github.io/images/informedhedge_vs_market.png"><br>
-Now, when we look at it at the market level, all of a sudden its performance looks much better! How come? Because it's <strong>very difficult if not impossible</strong> for this algorithm to consistently beat the best stocks in sector over time, <strong>but</strong> it is possible to outperform the market. This doesn't mean we should start using this for our retirements quite yet and quit our day jobs...more  on this later.<br></p>
-<p><img alt="" src="aimholte.github.io/images/informedhedgeoptimized_vs_stocks.png"><br>
-Looks pretty similar to what we had before, right?
-<img alt="" src="aimholte.github.io/images/informedhedgeoptimized_vs_market.png"><br>
-Compared to the market, that seems to look substantially better than the unoptimized version.</p>
-<p>Just to make sure we are on the right track - let's plot the performance of each version of the algorithm against each other: <br>
-<img alt="MyImage" src="aimholte.github.io/images/Figure_1.png"><br>
-This actually looks pretty close! Assuming we are using a buy-and-hold strategy, it looks like the <em>informed</em>, <em>optimized</em> hedge algorithm just barely beats out its optimized, naive counterpart. Looks like our second hypothesis is confirmed!</p>
-<h2>The Code</h2>
-<p>Now, the moment you've all been waiting for...the code itself!</p>
-<p>So, this is a pretty big file, about 350 lines of code to be exact! So I'll break down some of the code here and then leave you to explore as you wish.</p>
-<h3>Lines 2-8</h3>
-<p>The first thing that I would like to highlight here are the packages we are importing: RiskAdjustedReturnMetrics, numpy, numpy.linalg, math, csv, matplotlib, and pandas. Let's highlight what these all do:</p>
-<ul>
-<li>
-<p>RiskedAdjustedReturnMetrics is a great Github <a href="https://gist.github.com/StuartGordonReid/67a1ec4fbc8a84c0e856#file-riskadjustedreturnmetrics-py]">repository</a> written by Stuart Gordon Reid from <a href="http://www.turingfinance.com/">turingfinance.com</a>, a great website on computational finance that came in very handy for this project. This repo comes packed with a bunch of useful functions used to diagnose portfolio performance, such as computing Sharpe ratios, maximum drawdown, volatility, and many more. This much-needed package of functions helped  us evaluate the performance of our algorithm. A big thanks to Stuart for this one!</p>
-</li>
-<li>
-<p>Numpy and numpy.linalg are two fairly standard data science Python packages. They give us some nice capabilities for handling the data, along with some useful functions for linear algebra that we will need to optimize operations on our dataset.</p>
-</li>
-<li>
-<p>Math and CSV are both pretty standard when handling data as well. They provided us with some more nice functions for dealing with data and reading our CSV files for our dataset. </p>
-</li>
-<li>
-<p>Matplotlib and Pandas - also pretty standard. Matplotlib for plotting, Pandas for dealing with data.</p>
-</li>
-</ul>
-<p>As you can see, a lot of these packages are for dealing with data, which might seem a little overkill. But, all these packages put together give us some pretty powerful capabilities that vanilla Python does not, which will make implementing the algorithm much easier. </p>
-<script src="https://gist.github.com/aimholte/b04ecbb37d84b333dc9175759b630779.js"></script>
-
-<h3>Lines 13-40</h3>
-<p>Here we are doing some more basic setup - reading in our datasets, performing some basic computations on our dataset to get the maximum returns for each day (lines 25-27), constants for the number of stocks we are considering (line 29) and the number of time periods (line 30). Lines 33-39 we initialize what we called the "naive" weights for the stocks.  What this means is that in the first period, all weights for each stock is equal. So if there are about 100 stocks in our dataset, each stock would get a weight of 1% as a starting point. We also provide a value for <em>beta</em>, which is the "learning rate" of our algorithm (line 39).  Luckily for us - Freund and Schapire (1996) give us a get starting point to work with from their work.</p>
-<p>We also created a list that represented the <em>informed</em> weight for each stock. What does that mean exactly? As you'd probably expect, some stocks should definitely have a higher starting weight in our initial portfolio than others, right? There is no reason why a company like Apple, who has consistently outperformed the market for decades, should have the same weight in our portfolio as a small cap tech company that no one has ever heard of. Sure, that rinky-dink, small tech company has the <em>potential</em> to grow like  Apple has, but that's not for us to say or decide. Instead, what we are testing here is the idea that <em>more information is better</em>. If we know more about how something works, that should help, right?</p>
-<script src="https://gist.github.com/aimholte/44593e3471916f2970f98dc2a6f83f61.js"></script>
-
-<h3>Lines 43-98</h3>
-<p>Here we define the functions <em>plotProfits()</em>, <em>plotPrices()</em>, <em>plotChanges()</em>, and <em>plotChanges()</em>. As you can probably guess - these are our main visualization functions. We will use these to chart the algorithm's performance over time.</p>
-<script src="https://gist.github.com/aimholte/60741d8b627629cf4c7ab3a6d69acb23.js"></script>
-
-<h3>Lines 101-135</h3>
-<p>Hey, look! You've made it to <em>one</em> of our actual implementations of the hedge algorithm. The function's pretty simple, like it's pseudocode. Most important thing to note here - to determine our results from the period, we have to get the dot product of our stock weights, by the period's current prices, to get our return for the period (line 116). </p>
-<p>After that's done - we determine which stock had the greatest increase and then <em>penalize every other stock based off how different its change was from this maximum</em> (lines 120-121).</p>
-<p>Once everything is done - we plot our results (lines 132-135).</p>
-<script src="https://gist.github.com/aimholte/e17ff17743c59929dfec6e08a01cea0f.js"></script>
-
-<h3>Lines 137-194</h3>
-<p>This function <em>hedgeWithReturns()</em> is the same thing as above with a slight tweak: we <em>reinvest</em> our returns from the period back into our portfolio. Warren Buffet would be so proud, right? </p>
-<p>We use some of the functions from RiskAdjustedReturnMetrics here as well: the Sharpe ratio, upside potential, Calmar ratio, volatility, maximum drawdown, and average daily return. For definitions on these, <a href="http://www.turingfinance.com/computational-investing-with-python-week-one/]">Stuart's post</a> on Turing Finance is a great resource. All you really need to know though is that we want the Sharpe ratio, Calmar ratio, upside potential, and average daily return to be high. Whereas we want volatility and maxiumum drawdown to be low.</p>
-<script src="https://gist.github.com/aimholte/b6e86eb45cc24612e9405606f858e2a5.js"></script>
-
-<h3>Lines 196-226</h3>
-<p>This is basically the same function as above without the graphs. Used this for some testing.</p>
-<script src="https://gist.github.com/aimholte/86fba022bff66cde6d37216b8c5b08ce.js"></script>
-
-<h3>Lines 228-248</h3>
-<p>Another useful graphing function that we made. This one lets us see our returns from the hedge algorithm compared to that of the market and the iShares ETF.</p>
-<script src="https://gist.github.com/aimholte/110e0e16d4dbaac74734a0c3c33d03d7.js"></script>
-
-<h3>Lines 250-289</h3>
-<p>Here we define a pretty straightforward function, <em>marketDiagnostics()</em>. All we are really doing here is calling all those functions from the RiskAdjustedMetrics package for the returns generated from that of the Hedge algorithm and those of the S&amp;P 500. This function helped us with our performance evaluation.</p>
-<script src="https://gist.github.com/aimholte/d29aa825e9f319626f417c30e08232ff.js"></script>
-
-<h3>Lines 292-305</h3>
-<p>This is a relatively simple function as well, which we named  <em>bestBeta</em>. This one helps us pick an optimal value for our "tuning parameter," the learning rate <em>beta</em>. All this function does is loop over a bunch of small, incremental potential values for our learning parameter, determines which one of those values leads to the highest Sharpe ratio for the hedge algorithm, and then spits it back out to us. Simple but effective!</p>
-<script src="https://gist.github.com/aimholte/c67f7d14e94449695ce001a812954b1c.js"></script>
-
-<p><strong>We are getting close to being done, only a few more to go!</strong></p>
-<h3>Lines 307-324</h3>
-<p>This is yet another graphing function, <em>plotComparisonsWithMarket()</em>. The function takes all our different results from all the different versions of the algorithm we tried, graphs them, and displays their performance against that of the market.</p>
-<script src="https://gist.github.com/aimholte/4b1096048a6f116a9ffa677ed73fb6e2.js"></script>
-
-<h3>Lines 326-344</h3>
-<p>Another comparison function - <em>compareHedgeAlgorithms()</em>, which compares the performance of each of the versions we tried to one another.</p>
-<script src="https://gist.github.com/aimholte/726a3f25abad8dd744cf529a3254bc07.js"></script>
-
-<h3>Lines 346-349</h3>
-<p>A simple wrapper function which calls <em>marketDiagnostics()</em> and <em>compareHedgeAlgorithms()</em> that we discussed above.</p>
-<script src="https://gist.github.com/aimholte/7044554cab23090e9f31511a4c683704.js"></script>
-
-<p>That's it for the code!</p>
-<h2>Critiques</h2>
-<p>So, we've done all this work, so everything's good right? We can quit our jobs and let this thing make money for us right? Sit back, sleep in, and let this earn money for us? Not quite.</p>
-<p>As you can probably guess, trading with just one algorithm - and a simple one at that - is extremely risky. Furthermore, when you are in the market, you are competing directly with large, institutional investors. They have more people than you, more information than you, and more resources than you. Also, people build much more complex models to manage investing than this one. Based on all of this, would you tie your money to something this rudimentary? Probably not. </p>
-<p>That being said - our efforts aren't worthless. This algorithm, and others like it, can be used as a building block for more effective strategies, or as a program to consult with when an investor is considering a move in their portfolio. This gives a lot of power to the investor to make a more educated decision about their investments. I'll take that as a win in my book for sure!</p>
-<hr>
-<p>That draws an end to our first project post! We are hoping to have many more like this in the future. You can find the full source code for this project at <a href="https://github.com/aimholte/algorithms-project">this Github repository</a>.</p>
-<p><strong>References:</strong>
-http://algo.cs.uni-frankfurt.de/~pnakhe/Blog-Hedge/blog.html<br>
-http://www.turingfinance.com/computational-investing-with-python-week-one/
-https://gist.github.com/StuartGordonReid/67a1ec4fbc8a84c0e856#file-riskadjustedreturnmetrics-py 
-http://www.face-rec.org/algorithms/Boosting-Ensemble/decision-theoretic_generalization.pdf 
-http://www.morningstar.com/
-https://finance.yahoo.com/
-https://www.ishares.com/us
-https://pythonprogramming.net/handling-stock-data-graphing-python-programming-for-finance/?completed=/</p>                </article>
-            </aside><!-- /#featured -->
+</footer><!-- /.post-info -->                <p>An implementation of the hedge machine learning algorithm in the U.S. stock market.</p>
+                <a class="readmore" href="aimholte.github.io/the-hedge-algorithm-on-us-technology-stocks.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+                </ol><!-- /#posts-list -->
+                </section><!-- /#content -->
         <section id="extras" class="body">
                 <div class="blogroll">
                         <h2>links</h2>
