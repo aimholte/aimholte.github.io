@@ -1,0 +1,216 @@
+Title: Fitlering False Breakouts in the Foreign Exchange Market
+Date: 2018-07-02 8:00 a.m.
+Category: Our Projects
+Category: Finance
+Tags: matlab, finance, investing, algorithmic trading
+Authors: A.J. Imholte
+Summary: An implementation and backtesting of the filtering false breakouts foreign exchange market trading strategy.
+
+# Introduction
+
+Hello, and welcome back to Dudes That Code! Today, we are going to be covering another project from the realms of finance...this time, in the foreign exchange market. In this post, we will show you how we went about implementing Filtering False Breakouts, the popular foreign exchange market trading strategy.
+
+# The Strategy
+
+(insert image here)
+
+This trading strategy has two parts - one for long positions and one for short positions. Let's start with the long position first!
+
+## Long Position
+1. Look for a currency pair that is making a twenty-day high.
+2. Look for the price to reverse over the next three days to make a two-day low.
+3. Buy the pair if it takes out the twenty-day high within three days of making the two-day low.
+4. Sell the pair when the trade profit is double the amount risked.  In this case, that means **two times** the difference of the **twenty-day high** and the **two-day** low. 
+
+## Short Position
+The short position is just the opposite of the long position:
+1. Look for a currency pair that is making a twenty-day low.
+2. Look for the pair to reverse over the next three days to make a two-day high.
+3. Sell the pair (short) if it trades below the twenty-day low within three days of making the two-day high.
+4. Close the short position if the trade profit is double the amount risked. Similarly to before, this is **two times** the difference of the **twenty-day low** and the **two-day high**.
+
+Basically, what this strategy hopes to do is **catch large reversal trends** once the market has been sold off of a large amount of long/short positions. In this way, the strategy is able to catch the overall trend of the market while mitigating losses.
+
+# The Code
+Now, let's go over how this strategy is implemented.
+
+## Long position
+
+```MATLAB
+
+longbuyindicator = zeros(size(closeprice));
+longsellindicator = zeros(size(closeprice));
+i = length(closeprice);
+for i=length(closeprice):-1:20
+        start = i;
+        window = i - 19;
+        for k=start:-1:window
+            if(closeprice(k) == max(closeprice(i-19:i)))
+                if(closeprice(k+1) < closeprice(k) && closeprice(k+2) < closeprice(k+1))
+                    if(closeprice(k+3) > closeprice(k))
+                        longbuyindicator(k+3) = 1;
+                        sellcondition = false;
+                        amountrisked = closeprice(k) - closeprice(k+2);
+                        originalmax = closeprice(k);
+                        j = i + 1;
+                        while(sellcondition ~= true)
+                            if(closeprice(j) >= (originalmax + 2*amountrisked))
+                                longsellindicator(j) = 1;
+                                sellcondition = true;
+                            end
+                            j = j + 1;
+                        end
+                        break;
+                    end
+                        if(closeprice(k+4) > closeprice(k))
+                            longbuyindicator(k+4) = 1;
+                            sellcondition = false;
+                            amountrisked = closeprice(k) - closeprice(k+2);
+                            originalmax = closeprice(k);
+                            j = i + 1;
+                            while(sellcondition ~= true)
+                                if(closeprice(j) >= (originalmax + 2*amountrisked))
+                                longsellindicator(j) = 1;
+                                sellcondition = true;
+                                end
+                            j = j + 1;
+                            end
+                            break;
+                        end
+                    if(closeprice(k+5) > closeprice(k))
+                        longbuyindicator(k+5) = 1;
+                        sellcondition = false;
+                        amountrisked = closeprice(k) - closeprice(k+2);
+                        originalmax = closeprice(k);
+                        j = i + 1;
+                        while(sellcondition ~= true)
+                            if(closeprice(j) >= (originalmax + 2*amountrisked))
+                            longsellindicator(j) = 1;
+                            sellcondition = true;
+                            end
+                            j = j + 1;
+                        end
+                        break;
+                    end
+                end
+            end
+        end
+end
+
+```
+
+This can be an intimidating piece of code to look at, but basically what is going on here is that first, we search for an entry position. When we find an entry position, we being search for exit positions, which can be triggered by any one of our while loops in this case.
+
+## Short Condition
+
+The short condition is almost identical to the long condition in terms of code structure. 
+
+```MATLAB
+
+for i=length(closeprice):-1:20
+        start = i;
+        window = i - 19;
+        for k=start:-1:window
+            if(closeprice(k) == min(closeprice(i-19:i)))
+                if(closeprice(k+1) > closeprice(k) && closeprice(k+2) > closeprice(k+1))
+                    twodaymax = closeprice(k+2) + 0.0010;
+                    if(closeprice(k+3) < closeprice(k))
+                        shortbuyindicator(k+3) = 1;
+                        sellcondition = false;
+                        amountrisked = closeprice(k+2) - closeprice(k);
+                        originalmax = closeprice(k);
+                        stop = originalmax + 0.0010;
+                        j = i + 1;
+                        while(sellcondition ~= true)
+                            if(closeprice(j) <= (originalmax - 2*amountrisked))
+                                shortsellindicator(j) = 1;
+                                sellcondition = true;
+                                break;
+                            end
+                            if(closeprice(j) >= stop)
+                                shortsellindicator(j) = 1;
+                                sellcondition = true;
+                                break;
+                            end
+                            j = j + 1;
+                        end
+                        break;
+                    end
+                        if(closeprice(k+4) < closeprice(k))
+                            shortbuyindicator(k+4) = 1;
+                            sellcondition = false;
+                            amountrisked = closeprice(k+2) - closeprice(k);
+                            originalmax = closeprice(k);
+                            stop = originalmax + 0.0010;
+                            j = i + 1;
+                            while(sellcondition ~= true)
+                                if(closeprice(j) <= (originalmax - 2*amountrisked))
+                                    shortsellindicator(j) = 1;
+                                    sellcondition = true;
+                                    break;
+                                end
+                                if(closeprice(j) >= stop)
+                                    shortsellindicator(j) = 1;
+                                    sellcondition = true;
+                                    break;
+                                end
+                            j = j + 1;
+                            end
+                            break;
+                        end
+                    if(closeprice(k+5) < closeprice(k))
+                        shortbuyindicator(k+5) = 1;
+                        sellcondition = false;
+                        amountrisked = closeprice(k+2) - closeprice(k);
+                        originalmax = closeprice(k);
+                        j = i + 1;
+                        stop = originalmax + 0.0010;
+                        while(sellcondition ~= true)
+                            if(closeprice(j) <= (originalmax - 2*amountrisked))
+                                shortsellindicator(j) = 1;
+                                sellcondition = true;
+                                break;
+                            end
+                            if(closeprice(j) >= stop)
+                                shortsellindicator(j) = 1;
+                                sellcondition = true;
+                                break;
+                            end
+                            j = j + 1;
+                        end
+                        break;
+                    end
+                end
+            end
+        end
+end
+
+```
+
+Once again, we see a ton of loops - scary, right? While these were pretty involved to write at the time, these are basically doing the same things as before. Finding buying conditions first and, once a buying condition is met, looping until we find a matching selling condition.
+
+# Performance
+
+So, how does this actually perform in practice? We backtested this strategy to find the answer to this problem, using tick-by-tick data of the GBP/USD exchange rate from December 3, 2010 to January 31, 2010. Here are the results summarized below!  
+
+|                              | Short Strategy | Long Strategy | Combined |
+|------------------------------|----------------|---------------|----------|
+| Trades Executed              | 5              | 2             | 7        |
+| Percent of Profitable Trades | 80%            | 100%          | 85.60%   |
+| Trade Profit                 | 0.0614         | 0.0833        | 0.1447   |
+
+Keep in mind that the profits are in terms relative to one dollar invested.  So, if we would have invested one dollar using this strategy in this month, we would have made almost fifteen cents per dollar in the course of a month. If we were to simply buy-and-hold the exchange rate (which investors rarely  do, but this is really are only way to benchmark our results), we would have made about twelve cents per dollar invested. That means that we are outperforming the benchmark by using this strategy!
+
+# More Caveats
+
+If you saw my last post on [using the Hedge algorithm in the stock maret](http://dudesthatcode.com/category/our-projects.html), then you are probably familiar with this section of my finance posts. 
+
+Algorithmic is tough, but it is **extremely so** in the foreign exchange market. Why is this? Two words. **Market makers**. Think big, large financial institutions that are responsible for monitoring the forex market. On top of monitoring, they also buy and sell currencies to facilitate the marketplace. They also have access to what is known as the **order** book. Think of it as a ledger that is updated in real-time, that shows investors how many buying and selling orders are coming through the marketplace. 
+
+This - as you can probably guess - puts these large financial institutions at a **huge** advantage in the market in the form of additional information that mom and pop investors don't have. Not to mention that they have extremely large cash reserves for making trades, and impressive technology and traders to actually execute these trades.
+
+This makes investing the forex market as an individual investor, in my opinion, a very **risky** and **dangerous** proposition, even with a thought-out trading strategy. This is typically why you see investors starting out simply in stocks or ETFs, since they operate in markets that much less prone to market manipulations unlike the forex markets. And if you think **that's** bad, don't even get me started  on Bitcoin and cryptos...
+
+(insert another image here)
+
+That about wraps it up for today, thanks for reading and see you next time!

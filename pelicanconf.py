@@ -19,8 +19,8 @@ CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
-PLUGINS_PATHS = ['C:\aimho\blogcontent\aimholte.github.io\pelican-plugins\better_figures_and_images']
-PLUGINS = ['better_figures_and_images']
+PLUGIN_PATHS = ['pelican-plugins']
+PLUGINS = ['better_figures_and_images', 'readtime', 'optimize_images']
 RESPONSIVE_IMAGES = True
 
 # Blogroll
